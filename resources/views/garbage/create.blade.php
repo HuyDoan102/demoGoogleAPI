@@ -5,15 +5,15 @@
     <form action="{{ route('garbage.store') }}" method="POST">
         {{ csrf_field() }}
         <div class="form-group">
-            <input type="text" class="form-control" name="name" placeholder="Name ..." required>
+            <input type="text" class="form-control" id="nameGarbage" name="name" placeholder="Name ..." required>
         </div>
 
         <div class="form-group row">
             <div class="form-group col-sm-6">
-                <input type="text" class="form-control" name="lat" placeholder="Latitude .." required>
+                <input type="text" class="form-control" id="latGarbage" name="lat" placeholder="Latitude .." required>
             </div>
             <div class="form-group col-sm-6">
-                <input type="text" class="form-control" name="lng" placeholder="Longitude ..." required>
+                <input type="text" class="form-control" id="lngGarbage" name="lng" placeholder="Longitude ..." required>
             </div>
         </div>
 
