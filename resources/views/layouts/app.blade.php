@@ -13,6 +13,8 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/style.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 </head>
 <body>
@@ -58,7 +60,7 @@
                                         <a href="/home">Home page</a>
                                     </li>
                                     <li>
-                                        <a href="{{ route('garbage.index') }}">Admin</a>
+                                        <a href="{{ route('garbages.index') }}">Admin</a>
                                     </li>
                                     <li>
                                         <a href="{{ route('logout') }}"
@@ -86,5 +88,7 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/api.js') }}"></script>
     <script src="{{ asset('js/markerclusterer.js') }}"></script>
+    @yield ('scripts')
+
 </body>
 </html>

@@ -3,10 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\GarbageRequest;
+use App\Repositories\Contracts\GarbageInterface;
 use DB;
 
 class GarbageController extends Controller
 {
+
+    protected $repository;
+
+    public function __construct(GarbageInterface $repository)
+    {
+        $this->repository = $repository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,8 +24,8 @@ class GarbageController extends Controller
      */
     public function index()
     {
-        $garbages = DB::table('garbages')->get();
-        return view('garbage.index' , compact("garbages"));
+        $garbages = $this->repository->getAll();
+        return view('garbages.index' , compact("garbages"));
     }
 
     /**
@@ -25,7 +35,7 @@ class GarbageController extends Controller
      */
     public function create()
     {
-        return view('garbage.create');
+        return view('garbages.create');
     }
 
     /**
@@ -34,20 +44,24 @@ class GarbageController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(GarbageRequest $request)
     {
-        $payload = [
+        /*$payload = [
             'name' => $request->name,
-            'street' => $request->street,
-            'district' => $request->district,
+            'street' => $request->street . " " . !isset($request->route) ? "Updating" : $request->route,
+            'district' => !isset($request->district) ? "Updating" : $request->district ,
             'city' => $request->city,
             'country' => $request->country,
             'lat' => $request->lat,
             'lng' => $request->lng,
             'type' => $request->type
-        ];
-        DB::table('garbages')->insert($payload);
-        return redirect()->route('garbage.index');
+        ];*/
+        $garbage = $this->repository->insert($request);
+
+/*        if (Auth::attemp(["username"=>$request->username,""])) {
+            # code...
+        }*/
+        return redirect()->route('garbages.index');
     }
 
     /**
@@ -69,7 +83,8 @@ class GarbageController extends Controller
      */
     public function edit($id)
     {
-        //
+        $garbage = $this->repository->getById($id);
+        return view('garbages.edit', compact("garbage"));
     }
 
     /**
@@ -81,7 +96,8 @@ class GarbageController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $garbage = $this->repository->updateById($request, $id);
+        return redirect()->route("garbages.index");
     }
 
     /**
@@ -92,6 +108,7 @@ class GarbageController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $garbage = $this->repository->deleteGarbage($id);
+        return redirect()->route("garbages.index");
     }
 }
