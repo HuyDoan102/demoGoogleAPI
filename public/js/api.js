@@ -1,5 +1,7 @@
-function initMap() {
+function initMap (callback) {
+    // khai bao mang cluster de bo 1 location vao 1 cluster
     var cluster = [];
+    // tao 1 maps voi center, zoom va styles
     var map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 16.0326902, lng: 108.2104015},
         zoom: 5,
@@ -22,11 +24,19 @@ function initMap() {
             ]
         }]
     });
-    var garbages = document.getElementById("map").getAttribute("garbages");
-    console.log(typeof(garbages));
-    var markers = JSON.parse(garbages);
-    console.log(markers);
 
+    if (callback) {
+        callback(map);
+    }
+
+    // chuyen data tu html sang JavaScript
+    var garbages = document.getElementById("map").getAttribute("garbages");
+    // console.log(typeof(garbages));
+    // Chuyen string data ve JSON Object
+    var markers = JSON.parse(garbages);
+    // console.log(markers);
+
+    // lap lai array, them tat ca cac location vao trong map mark maps
     Array.prototype.forEach.call(markers, function(markerElem) {
         var id = markerElem.id;
         var name = markerElem.name;
@@ -45,7 +55,7 @@ function initMap() {
         var infoWindow = new google.maps.InfoWindow;
 
         var icon = {
-            url: "images/garbage.png", // url
+            url: "/images/garbage.png", // url
             scaledSize: new google.maps.Size(25, 25), // scaled size
             origin: new google.maps.Point(0, 0), // origin
             anchor: new google.maps.Point(0, 0) // anchor
@@ -73,19 +83,152 @@ function initMap() {
         });
     });
 
+    // them tat ca cac loction trong map vao MakerClusterer Object
     var markerCluster = new MarkerClusterer(map, cluster,
         {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
 
-    var defaultBounds = new google.maps.LatLngBounds(
-        new google.maps.LatLng(-33.8902, 151.1759),
-        new google.maps.LatLng(-33.8474, 151.2631));
 
+    // SEARCH
+    // get data tu input search
     var input = document.getElementById('search');
-    var options = {
-        bounds: defaultBounds,
-        types: ['establishment']
-    };
+    // them data input vao trong Object searchBox de co data do xuong
+    var searchBox = new google.maps.places.SearchBox(input);
 
-    autocomplete = new google.maps.places.Autocomplete(input, options);
+    //set khu vuc tim kiem getBounds() : tra ve lat/lng trong khung hinh hien tai neu co nhieu hon 1 copy map thi set tu -180 -> 180 do
+    map.addListener('bounds_changed', function() {
+        searchBox.setBounds(map.getBounds());
+    });
+
+    // khai bao 1 mang rong de bo cac vi tri danh dau
+    markerLocations = [];
+
+    //Nghe sự kiện này được kích hoạt khi người dùng chọn một dự đoán và truy xuất thêm chi tiết cho nơi đó.
+    searchBox.addListener('places_changed', function() {
+        var places = searchBox.getPlaces();
+
+        if (places.length == 0) {
+            return;
+        }
+
+        // Xoa nhung danh dau cu
+        markerLocations.forEach(function(marker) {
+            marker.setMap(null);
+        });
+        markerLocations = [];
+
+        var bounds = new google.maps.LatLngBounds();
+        // Voi moi Object lay icon, name va location
+        places.forEach(function(place) {
+            // neu khong ton tai lat va lng thi return
+            if (!place.geometry) {
+                console.log("Returned place contains no geometry");
+                return;
+            }
+
+            // cai dat icon
+            var icon = {
+                url: "/images/places.png",
+                size: new google.maps.Size(71, 71),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(25, 25)
+            };
+
+            // Tao mot danh dau cho moi dia diem
+            markerLocations.push(new google.maps.Marker({
+                map: map,
+                icon: icon,
+                title: place.name,
+                position: place.geometry.location
+            }));
+
+            if (place.geometry.viewport) {
+                // Only geocodes have viewport.
+                bounds.union(place.geometry.viewport);
+            } else {
+                bounds.extend(place.geometry.location);
+            }
+        });
+        map.fitBounds(bounds);
+    });
 }
 
+
+// Khai bao form long_name and short_name ma map reture
+var componentForm = {
+    street_number: 'short_name', //
+    route: 'long_name',
+    locality: 'short_name',
+    region: 'long_name',
+    country: 'long_name',
+    administrative_area_level_1: 'short_name',
+};
+
+//auto register form
+function initAutocomplete()
+{
+    var input = document.getElementById('nameGarbage');
+
+    autocomplete = new google.maps.places.Autocomplete(
+        input,
+        {types: ['geocode']}
+        );
+    autocomplete.addListener('place_changed', fillInAddress);
+}
+
+// chen address vao form
+function fillInAddress()
+{
+    // lay chi tiet dia chi tu doi tuong autocomplete
+    var place = autocomplete.getPlace();
+    console.log(place);
+    document.getElementById("latGarbage").value = place.geometry.location.lat();
+    document.getElementById("lngGarbage").value = place.geometry.location.lng();
+
+    // xoa value cua form khi search lai address
+    for (var component in componentForm) {
+        if (!!document.getElementById(component)) {
+            document.getElementById(component).value = '';
+            document.getElementById(component).disabled = false;
+        }
+    }
+
+    //lay cac thanh phan tu place cua address va dien vao bieu mau
+    for (var i = 0; i < place.address_components.length; i++) {
+        var addressType = place.address_components[i].types[0];
+        console.log(addressType);
+        if (componentForm[addressType]) {
+            var val = place.address_components[i][componentForm[addressType]];
+            document.getElementById(addressType).value = val;
+        }
+    }
+}
+
+// lay dia chi hien tai cua minh
+function geolocate(map, callback)
+{
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            var geolocation = new google.maps.LatLng(
+                position.coords.latitude, position.coords.longitude);
+
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+            var position = {
+                lat: latitude,
+                lng: longitude
+            }
+            map.setCenter(position);
+            map.setZoom(16);
+
+            var marker = new google.maps.Marker({
+                position: position,
+                map: map
+            });
+
+            if (callback) {
+                callback(position);
+            }
+        });
+    }
+}

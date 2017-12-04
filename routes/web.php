@@ -17,6 +17,8 @@ Route::get('/', function () {
 
 Auth::routes();
 
+Route::group(['middleware','Auth'], function()
+{
 Route::get('/home', 'HomeController@index')->name('home');
-
-Route::resource('garbage', 'GarbageController');
+    Route::resource('garbages', 'GarbageController');
+});
