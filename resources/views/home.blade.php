@@ -21,7 +21,6 @@
 @endsection
 
 @section ('scripts')
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA0O6PscWjtS3m6PnfCSdi13Kvkxn18rIo&libraries=places"></script>
 <script>
     initMap();
 </script>
