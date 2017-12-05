@@ -32,7 +32,11 @@
                 <td>{{ $garbage->type }}</td>
                 <td>
                     <a href="{{ route("garbages.edit", $garbage->id) }}" class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
-                    <a href="{{ route("garbages.destroy", $garbage->id) }}" class="delete btn btn-danger btn-sm"><i class="fa fa-trash-o"></i></a>
+                    <a href="javascript:void(0);" url="{{ route('garbages.destroy', $garbage->id) }}"
+                        data-toggle="modal" data-target="#deleteGarbage"
+                        class="delete btn btn-danger btn-sm">
+                        <i class="fa fa-trash-o"></i>
+                    </a>
                 </td>
             </tr>
             @endforeach
@@ -40,27 +44,6 @@
     </table>
 </div>
 
-<form action method="POST" class="formdelete" style="display: none;">
-    {{ csrf_field() }}
-    {{ method_field("DELETE") }}
-    Do you want deletes this ?
-    <button type="submit">Yes</button>
-    <button class="cancelform">No</button>
-</form>
-
-<script>
-    jQuery(document).ready(function($){
-        $('.delete').on('click',function(event){
-            event.preventDefault(); // giúp không cần phải tải một url mới
-            $('.formdelete').show();
-            data = $(this).attr('href');
-            $('.formdelete').attr('action', data);
-        });
-        $('.cancelform').on('click',function(event){
-            event.preventDefault();
-            $('.formdelete').hide();
-        });
-    });
-</script>
+@include("garbages.delete");
 
 @endsection

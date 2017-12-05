@@ -31,8 +31,7 @@ function initMap (callback) {
 
     // chuyen data tu html sang JavaScript
     var garbages = document.getElementById("map").getAttribute("garbages");
-    // console.log(typeof(garbages));
-    // Chuyen string data ve JSON Object
+
     var markers = JSON.parse(garbages);
     // console.log(markers);
 
@@ -105,6 +104,7 @@ function initMap (callback) {
     //Nghe sự kiện này được kích hoạt khi người dùng chọn một dự đoán và truy xuất thêm chi tiết cho nơi đó.
     searchBox.addListener('places_changed', function() {
         var places = searchBox.getPlaces();
+        console.log(places);
 
         if (places.length == 0) {
             return;
@@ -164,71 +164,97 @@ var componentForm = {
     administrative_area_level_1: 'short_name',
 };
 
+
+
 //auto register form
 function initAutocomplete()
 {
+    var map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 16.0326902, lng: 108.2104015},
+        zoom: 5,
+        styles: [
+        {
+            "featureType": "poi.business",
+            "stylers": [
+            {
+                "visibility": "off"
+            }
+            ]
+        },
+        {
+            "featureType": "poi.park",
+            "elementType": "labels.text",
+            "stylers": [
+            {
+                "visibility": "off"
+            }
+            ]
+        }]
+    });
+
     var input = document.getElementById('nameGarbage');
 
-    autocomplete = new google.maps.places.Autocomplete(
-        input,
-        {types: ['geocode']}
-        );
-    autocomplete.addListener('place_changed', fillInAddress);
-}
+    autocomplete = new google.maps.places.Autocomplete(input);
 
-// chen address vao form
-function fillInAddress()
-{
-    // lay chi tiet dia chi tu doi tuong autocomplete
-    var place = autocomplete.getPlace();
-    console.log(place);
-    document.getElementById("latGarbage").value = place.geometry.location.lat();
-    document.getElementById("lngGarbage").value = place.geometry.location.lng();
+    markerLocations = [];
 
-    // xoa value cua form khi search lai address
-    for (var component in componentForm) {
-        if (!!document.getElementById(component)) {
-            document.getElementById(component).value = '';
-            document.getElementById(component).disabled = false;
-        }
-    }
+    map.addListener('bounds_changed', function() {
+        autocomplete.setBounds(map.getBounds());
+    });
 
-    //lay cac thanh phan tu place cua address va dien vao bieu mau
-    for (var i = 0; i < place.address_components.length; i++) {
-        var addressType = place.address_components[i].types[0];
-        console.log(addressType);
-        if (componentForm[addressType]) {
-            var val = place.address_components[i][componentForm[addressType]];
-            document.getElementById(addressType).value = val;
-        }
-    }
-}
+    var icon = {
+        url: "/images/garbage.png",
+        size: new google.maps.Size(71, 71),
+        origin: new google.maps.Point(0, 0),
+        anchor: new google.maps.Point(17, 34),
+        scaledSize: new google.maps.Size(25, 25)
+    };
+    var marker = new google.maps.Marker({
+        map: map,
+        icon: icon,
+    });
 
-// lay dia chi hien tai cua minh
-function geolocate(map, callback)
-{
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            var geolocation = new google.maps.LatLng(
-                position.coords.latitude, position.coords.longitude);
+    autocomplete.addListener('place_changed', function(){
+        var place = autocomplete.getPlace();
 
-            var latitude = position.coords.latitude;
-            var longitude = position.coords.longitude;
-            var position = {
-                lat: latitude,
-                lng: longitude
+        document.getElementById("latGarbage").value = place.geometry.location.lat();
+        document.getElementById("lngGarbage").value = place.geometry.location.lng();
+
+        // xoa value cua form khi search lai address
+        for (var component in componentForm) {
+            if (!!document.getElementById(component)) {
+                document.getElementById(component).value = '';
+                document.getElementById(component).disabled = false;
             }
-            map.setCenter(position);
-            map.setZoom(16);
+        }
 
-            var marker = new google.maps.Marker({
-                position: position,
-                map: map
-            });
-
-            if (callback) {
-                callback(position);
+        //lay cac thanh phan tu place cua address va dien vao bieu mau
+        for (var i = 0; i < place.address_components.length; i++) {
+            var addressType = place.address_components[i].types[0];
+            if (componentForm[addressType]) {
+                var val = place.address_components[i][componentForm[addressType]];
+                document.getElementById(addressType).value = val;
             }
-        });
-    }
+        }
+
+        marker.setVisible(false);
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+            window.alert("No details available for input: '" + place.name + "'");
+            return;
+        }
+
+        // If the place has a geometry, then present it on a map.
+        if (place.geometry.viewport) {
+            map.fitBounds(place.geometry.viewport);
+        } else {
+            map.setCenter(place.geometry.location);
+            map.setZoom(17);  // Why 17? Because it looks good.
+        }
+        marker.setPosition(place.geometry.location);
+        marker.setVisible(true);
+        markerLocations.push(marker);
+    });
 }
+
+
