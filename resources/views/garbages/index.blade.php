@@ -42,6 +42,9 @@
             @endforeach
         </tbody>
     </table>
+    <div class="text-center">
+        {{ $garbages->links() }}
+    </div>
 </div>
 
 @include("garbages.delete");

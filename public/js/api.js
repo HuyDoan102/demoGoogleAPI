@@ -166,6 +166,11 @@ var componentForm = {
 
 
 
+//----------------------------------------------------------------------------------------------------
+
+
+
+
 //auto register form
 function initAutocomplete()
 {
@@ -192,26 +197,43 @@ function initAutocomplete()
         }]
     });
 
-    var input = document.getElementById('nameGarbage');
-
-    autocomplete = new google.maps.places.Autocomplete(input);
-
     markerLocations = [];
-
-    map.addListener('bounds_changed', function() {
-        autocomplete.setBounds(map.getBounds());
-    });
 
     var icon = {
         url: "/images/garbage.png",
-        size: new google.maps.Size(71, 71),
+        size: new google.maps.Size(100, 100),
         origin: new google.maps.Point(0, 0),
         anchor: new google.maps.Point(17, 34),
         scaledSize: new google.maps.Size(25, 25)
     };
-    var marker = new google.maps.Marker({
-        map: map,
-        icon: icon,
+
+    google.maps.event.addListener(map, 'click', function(event) {
+
+        if(markerLocations.length != 0) {
+            markerLocations.forEach(function(marker) {
+                marker.setMap(null);
+            });
+        }
+        marker = new google.maps.Marker({
+            position: event.latLng,
+            map: map,
+            icon: icon
+        });
+        markerLocations.push(marker);
+        /*document.getElementById("latGarbage").value = event.latLng.lat();
+        document.getElementById("lngGarbage").value = event.latLng.lng();*/
+        document.getElementById("latGarbage").value = event.latLng.lat();
+        document.getElementById("lngGarbage").value = event.latLng.lng();
+        document.getElementById("atGarbage").value = event.latLng.lat();
+        document.getElementById("ngGarbage").value = event.latLng.lng();
+    });
+
+    var input = document.getElementById('nameGarbage');
+
+    autocomplete = new google.maps.places.Autocomplete(input);
+
+    map.addListener('bounds_changed', function() {
+        autocomplete.setBounds(map.getBounds());
     });
 
     autocomplete.addListener('place_changed', function(){
@@ -219,6 +241,9 @@ function initAutocomplete()
 
         document.getElementById("latGarbage").value = place.geometry.location.lat();
         document.getElementById("lngGarbage").value = place.geometry.location.lng();
+
+        document.getElementById("atGarbage").value = place.geometry.location.lat();
+        document.getElementById("ngGarbage").value = place.geometry.location.lng();
 
         // xoa value cua form khi search lai address
         for (var component in componentForm) {
@@ -237,11 +262,26 @@ function initAutocomplete()
             }
         }
 
+
+        marker = new google.maps.Marker({
+            map: map,
+            icon: icon
+        });
+
+        // search address with maps follow
         marker.setVisible(false);
         var place = autocomplete.getPlace();
         if (!place.geometry) {
             window.alert("No details available for input: '" + place.name + "'");
             return;
+        }
+
+        console.log(markerLocations.length);
+
+        if(markerLocations.length != 0) {
+            markerLocations.forEach(function(marker) {
+                marker.setMap(null);
+            });
         }
 
         // If the place has a geometry, then present it on a map.
@@ -255,6 +295,33 @@ function initAutocomplete()
         marker.setVisible(true);
         markerLocations.push(marker);
     });
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            var place = {
+                url: "/images/places.png",
+                size: new google.maps.Size(100, 100),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(25, 25)
+            };
+
+            var userMarker = new google.maps.Marker({
+                position: pos,
+                map: map,
+                icon: place
+            });
+        }, function() {
+            handleLocationError(true, infoWindow, map.getCenter());
+        });
+    } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+    }
 }
 
 
