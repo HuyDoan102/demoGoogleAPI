@@ -52,10 +52,12 @@
 
                 <div class="form-group row">
                     <div class="form-group col-sm-6">
-                        <input type="text" class="form-control" id="latGarbage" name="lat" placeholder="Latitude .." value="{{ old('lat') }}">
+                        <input type="text" class="form-control" id="latGarbage" placeholder="Latitude .." value="{{ old('lat') }}" disabled>
+                        <input type="hidden" class="form-control" id="atGarbage" name="lat" placeholder="Latitude .." value="{{ old('lat') }}">
                     </div>
                     <div class="form-group col-sm-6">
-                        <input type="text" class="form-control" id="lngGarbage" name="lng" placeholder="Longitude ..." value="{{ old('lng') }}">
+                        <input type="text" class="form-control" id="lngGarbage" placeholder="Longitude ..." value="{{ old('lng') }}" disabled>
+                        <input type="hidden" class="form-control" id="ngGarbage" name="lng" placeholder="Longitude ..." value="{{ old('lng') }}">
                     </div>
                 </div>
 
