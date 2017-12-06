@@ -9,7 +9,7 @@ class GarbageRepository implements GarbageInterface
 {
     public function getAll()
     {
-        return DB::table('garbages')->get();
+        return DB::table('garbages')->paginate(10);
     }
 
     public function insert($request)
