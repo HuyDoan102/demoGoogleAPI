@@ -36,7 +36,7 @@ class GarbageRepository implements GarbageInterface
     {
         $payload = [
             'name' => $request->name,
-            'street' => !isset($request->route) ? "Updating" : $request->street . " " . $request->route,
+            'street' => $request->street,
             'district' => !isset($request->district) ? "Updating" : $request->district ,
             'city' => $request->city,
             'country' => $request->country,

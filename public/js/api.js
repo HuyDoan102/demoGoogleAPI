@@ -1,4 +1,5 @@
 function initMap (callback) {
+
     // khai bao mang cluster de bo 1 location vao 1 cluster
     var cluster = [];
     // tao 1 maps voi center, zoom va styles
@@ -33,7 +34,6 @@ function initMap (callback) {
     var garbages = document.getElementById("map").getAttribute("garbages");
 
     var markers = JSON.parse(garbages);
-    // console.log(markers);
 
     // lap lai array, them tat ca cac location vao trong map mark maps
     Array.prototype.forEach.call(markers, function(markerElem) {
@@ -73,9 +73,8 @@ function initMap (callback) {
         + '<p>' + city + ", " + country + '</p>'
 
         marker.setMap(map);
-        // console.log(markers);
         cluster.push(marker);
-        // console.log(cluster);
+
         marker.addListener('click', function() {
             infoWindow.setContent(contentString);
             infoWindow.open(map, marker);
@@ -104,7 +103,6 @@ function initMap (callback) {
     //Nghe sự kiện này được kích hoạt khi người dùng chọn một dự đoán và truy xuất thêm chi tiết cho nơi đó.
     searchBox.addListener('places_changed', function() {
         var places = searchBox.getPlaces();
-        console.log(places);
 
         if (places.length == 0) {
             return;
@@ -151,6 +149,76 @@ function initMap (callback) {
         });
         map.fitBounds(bounds);
     });
+
+    var infoWindow = new google.maps.InfoWindow({map: map});
+
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 7,
+                center: {lat: 16.0326902, lng: 108.2104015}
+            });
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude};
+
+
+                var place = {
+                    url: "/images/places.png",
+                    size: new google.maps.Size(100, 100),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(17, 34),
+                    scaledSize: new google.maps.Size(25, 25)
+                };
+
+                var userMarker = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    icon: place
+                });
+
+                infoWindow.setPosition(pos);
+                infoWindow.setContent('Location found.');
+                map.setCenter(pos);
+
+                var addressGarbage = document.getElementById('end').value;
+
+                console.log(addressGarbage);
+
+                var directionsService = new google.maps.DirectionsService;
+                var directionsDisplay = new google.maps.DirectionsRenderer;
+
+                directionsDisplay.setMap(map);
+
+                var onChangeHandler = function() {
+                    calculateAndDisplayRoute(directionsService, directionsDisplay);
+                };
+                document.getElementById('end').addEventListener('change', onChangeHandler);
+
+                function calculateAndDisplayRoute(directionsService, directionsDisplay) {
+                    directionsService.route({
+                        origin: pos,
+                        destination: document.getElementById('end').value,
+                        travelMode: 'DRIVING'
+                    }, function(response, status) {
+                        if (status === 'OK') {
+                            directionsDisplay.setDirections(response);
+                        } else {
+                            window.alert('Directions request failed due to ' + status);
+                        }
+                    });
+                }
+
+
+            }, function() {
+                handleLocationError(true, infoWindow, map.getCenter());
+            });
+
+    } else {
+        handleLocationError(false, infoWindow, map.getCenter());
+    }
+
 }
 
 
@@ -209,25 +277,29 @@ function initAutocomplete()
 
     google.maps.event.addListener(map, 'click', function(event) {
 
+        // xoa tat ca cac danh dau tren maps
         if(markerLocations.length != 0) {
             markerLocations.forEach(function(marker) {
                 marker.setMap(null);
             });
         }
+        // them danh dau vao maps
         marker = new google.maps.Marker({
             position: event.latLng,
             map: map,
             icon: icon
         });
+        // push map
         markerLocations.push(marker);
-        /*document.getElementById("latGarbage").value = event.latLng.lat();
-        document.getElementById("lngGarbage").value = event.latLng.lng();*/
+
+        // them vao lat lng vao textbox khi click chon into maps
         document.getElementById("latGarbage").value = event.latLng.lat();
         document.getElementById("lngGarbage").value = event.latLng.lng();
         document.getElementById("atGarbage").value = event.latLng.lat();
         document.getElementById("ngGarbage").value = event.latLng.lng();
     });
 
+    // auto add information into form as lat lng name street .....
     var input = document.getElementById('nameGarbage');
 
     autocomplete = new google.maps.places.Autocomplete(input);
@@ -245,7 +317,7 @@ function initAutocomplete()
         document.getElementById("atGarbage").value = place.geometry.location.lat();
         document.getElementById("ngGarbage").value = place.geometry.location.lng();
 
-        // xoa value cua form khi search lai address
+        // kiem tra va xoa value cua form khi search lai address
         for (var component in componentForm) {
             if (!!document.getElementById(component)) {
                 document.getElementById(component).value = '';
@@ -253,7 +325,7 @@ function initAutocomplete()
             }
         }
 
-        //lay cac thanh phan tu place cua address va dien vao bieu mau
+        //lay cac thanh phan tu place cua address va dien vao form
         for (var i = 0; i < place.address_components.length; i++) {
             var addressType = place.address_components[i].types[0];
             if (componentForm[addressType]) {
@@ -261,7 +333,6 @@ function initAutocomplete()
                 document.getElementById(addressType).value = val;
             }
         }
-
 
         marker = new google.maps.Marker({
             map: map,
@@ -276,15 +347,14 @@ function initAutocomplete()
             return;
         }
 
-        console.log(markerLocations.length);
-
+        // xoa danh dau
         if(markerLocations.length != 0) {
             markerLocations.forEach(function(marker) {
                 marker.setMap(null);
             });
         }
 
-        // If the place has a geometry, then present it on a map.
+        // kiem tra co dia chi geometry hay khong va show no len maps
         if (place.geometry.viewport) {
             map.fitBounds(place.geometry.viewport);
         } else {
@@ -295,13 +365,14 @@ function initAutocomplete()
         marker.setVisible(true);
         markerLocations.push(marker);
     });
+
+    // get current address
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             var pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
-
             var place = {
                 url: "/images/places.png",
                 size: new google.maps.Size(100, 100),
