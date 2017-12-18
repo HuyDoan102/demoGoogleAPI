@@ -25,6 +25,7 @@ class GarbageRequest extends FormRequest
     {
         return [
             'name' => 'required',
+            'street' => 'required',
             'city' => 'required',
             'country' => 'required',
             'lat' => ['required','regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],

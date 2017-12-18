@@ -4,7 +4,7 @@
 
 <div class="container">
     <h2>Garbages Management</h2>
-    <a href="{{ route('garbages.create') }}" class="btn btn-primary btn-sm">Create</a>
+    <a href="{{ route('garbages.create') }}" class="btn btn-primary btn-sm">CREATE</a>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -16,7 +16,7 @@
                 <th>Latitude</th>
                 <th>Longitude</th>
                 <th>Type</th>
-                <th>Action</th>
+                <th style="width: 100px">Action</th>
             </tr>
         </thead>
         <tbody>
