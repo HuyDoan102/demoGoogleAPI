@@ -57,7 +57,7 @@
         </div>
 
         <div class="form-group">
-            <button class="btn btn-primary" type="submit">Pushlish</button>
+            <button class="btn btn-primary" type="submit">UPDATE</button>
         </div>
     </form>
 </div>

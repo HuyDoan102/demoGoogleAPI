@@ -46,21 +46,7 @@ class GarbageController extends Controller
      */
     public function store(GarbageRequest $request)
     {
-        /*$payload = [
-            'name' => $request->name,
-            'street' => $request->street . " " . !isset($request->route) ? "Updating" : $request->route,
-            'district' => !isset($request->district) ? "Updating" : $request->district ,
-            'city' => $request->city,
-            'country' => $request->country,
-            'lat' => $request->lat,
-            'lng' => $request->lng,
-            'type' => $request->type
-        ];*/
         $garbage = $this->repository->insert($request);
-
-/*        if (Auth::attemp(["username"=>$request->username,""])) {
-            # code...
-        }*/
         return redirect()->route('garbages.index');
     }
 

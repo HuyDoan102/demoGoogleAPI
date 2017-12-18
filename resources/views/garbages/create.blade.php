@@ -4,6 +4,11 @@
     <h2>Pushlish garbage</h2>
     <div class="row">
         <div class="col-sm-6">
+            <div class="form-group row">
+                <div class="col-sm-6">
+                    <input type="text" class="form-control" id="nameGarbage" name="searchLocation" placeholder="&#128269;" value="{{ old('searchLocation') }}">
+                </div>
+            </div>
             <form action="{{ route('garbages.store') }}" method="POST">
                 {{ csrf_field() }}
 
@@ -21,11 +26,6 @@
                     <input type="text" class="form-control" name="name" placeholder="Name ..." value="{{ old('name') }}">
                 </div>
 
-                <div class="form-group row">
-                    <div class="col-sm-6">
-                        <input type="text" class="form-control" id="nameGarbage" name="searchLocation" placeholder="&#128269;" value="{{ old('searchLocation') }}">
-                    </div>
-                </div>
 
                 <div class="form-group row">
                     <div class="form-group col-sm-6">
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="form-group">
-                    <button class="btn btn-primary" type="submit">Pushlish</button>
+                    <button class="btn btn-primary" type="submit">PUSHLISH</button>
                 </div>
             </form>
         </div>
